@@ -10,14 +10,17 @@ Requires the TTPOS MCP server to be connected. This skill chains the other Pivot
 
 ## Workflow
 
-1. Pick the market: `forex` by default, or `crypto` or `america`. If the user gave tickers, use them and skip step 4's shortlist.
-2. Call `get_calendar` for the next 12 hours (pivot-calendar skill).
-3. Call `get_currency_strength` (pivot-calendar skill).
-4. Call `get_screener_tops` for the market, then `get_flight_plan` (`grain` D) on the first three symbols (pivot-screener and pivot-flightplan skills). Pass symbols to the tools exactly as the tools return them (exchange prefix included, for example `VANTAGE:EURJPY`); never rebuild or shorten a ticker. If `get_screener_tops` answers `plan_required`, fall back to `scan_screener` with the NARROW regime.
-   - If `get_flight_plan` answers `plan_required`, call it no more: in section (c), list the three symbols with their screener regime and position only, and say the flight plans need the plan named in the message, with its pricing link.
+0. Call `get_profile` first. Pick the market: if the user named one, use it; otherwise from `answers.markets` (`metaux`, `majeures` or `croisees` mean `forex`; `crypto` means `crypto`; if both appear, brief `forex` and offer `crypto` afterwards). With no usable market, use `forex`; `america` only on request. Pick the depth from `answers.time` (minutes available a day): 15 means steps 1 to 3; 30 or variable means steps 1 to 4; 60 means steps 1 to 5. If `get_profile` fails (for example 402 or 404) or `answers` is empty, do not stop: use `forex` and the 30 depth. If the user gave tickers, use them and skip the shortlist of step 3.
+1. Call `get_calendar` for the next 12 hours (pivot-calendar skill).
+2. Call `get_currency_strength` (pivot-calendar skill).
+3. Call `get_screener_tops` for the market and keep its first three symbols (pivot-screener skill). Pass symbols to the tools exactly as the tools return them (exchange prefix included, for example `VANTAGE:EURJPY`); never rebuild or shorten a ticker. If `get_screener_tops` answers `plan_required`, fall back to `scan_screener` with the NARROW regime.
+4. Call `get_flight_plan` (`grain` D) on the three symbols (pivot-flightplan skill).
+   - If `get_flight_plan` answers `plan_required`, call it no more: in the top-picks section, list the three symbols with their screener regime and position only, and say the flight plans need the plan named in the message, with its pricing link.
    - If it answers `warming` for a symbol, retry once after `retry_after` seconds; if it still fails, say the plan of that symbol is not available yet and go on with the others. Never fill a missing plan with your own levels.
-5. Before proposing a plan, optionally call `get_risk_status` (pivot-risk skill) so the user knows their remaining budget.
-6. Reply with exactly four sections: (a) announcements to avoid, (b) currency strength, (c) the three flight plans in method order (CPR regime, price position, router, levels as returned), (d) what to validate in TTPOS before any trade.
+5. Call `check_entry` on the three symbols (pivot-entry skill) and give each status as returned.
+6. Optionally call `get_risk_status` (pivot-risk skill) so the user knows their remaining budget.
+7. Propose one entry alert on the best candidate (`create_alert` with condition kind `entry`), saying which status it waits for. Never create it without the user's agreement: ask first and wait for a yes. Only when the depth reached step 5.
+8. Reply with these sections, skipping those beyond the chosen depth: (a) announcements to avoid, (b) currency strength, (c) top picks, (d) the three flight plans in method order (CPR regime, price position, router, levels as returned), (e) entry status, (f) the proposed alert, (g) what to validate in TTPOS before any trade.
 
 ## Rules (always)
 
