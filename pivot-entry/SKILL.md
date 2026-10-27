@@ -15,7 +15,9 @@ Requires the TTPOS MCP server to be connected. The Entry Timer reads the daily d
    - `tf`: execution candle timeframe in minutes, `5`, `15` (default) or `30`;
    - `zones`: zones to watch among DPZ, GPZ, MTZ, CPR, H3L3, MZ (all when omitted);
    - `signals`: reversal signals to accept among extreme, wick, outside, doji (all when omitted);
-   - `side`: `auto` (the execution bias of the day, default), `long` or `short`.
+   - `side`: `auto` (the execution bias of the day, default), `long` or `short`;
+   - `as_of`: an ISO 8601 datetime (UTC if no offset) to replay the status at a past moment, using only candles closed before it. It works for the current session or the 5 previous ones, otherwise it is refused. It costs the same as a live call. The result carries `as_of`: say that the status is a replay, not the live one;
+   - `min_score`: 0 to 100, ignores reversal signals whose desk score is below it. `ignored_below_min_score` counts the signals dropped: mention it, so a quiet result is not read as "no signal at all".
    It needs the Abonné plan and costs 1 credit, so call it once per symbol and per question.
 3. Explain the `status` as returned:
    - `NOT_ARMED`: no usable direction, zone or data right now; read the `reason` and say so.

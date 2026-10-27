@@ -1,6 +1,6 @@
 # TTPOS skills: Pivot Master suite
 
-Seven Agent Skills (open SKILL.md format, agentskills.io) that teach an AI assistant the Pivot Master workflows (Franklin Ochoa's CPR method and Trend X) on top of the TTPOS MCP server.
+Nine Agent Skills (open SKILL.md format, agentskills.io) that teach an AI assistant the Pivot Master workflows (Franklin Ochoa's CPR method and Trend X) on top of the TTPOS MCP server.
 
 | Skill | What it does |
 | --- | --- |
@@ -10,9 +10,9 @@ Seven Agent Skills (open SKILL.md format, agentskills.io) that teach an AI assis
 | `pivot-risk` | Accounts, daily risk gauge and decision journal (read only) |
 | `pivot-entry` | Entry Timer: is price on a zone with a reversal signal, and a one-shot alert |
 | `pivot-propose` | Proposes a decision to the human in TTPOS after your explicit agreement (Avancé plan); never approves or executes |
+| `pivot-journal` | Reviews your closed trades from the EA journal: statistics and where you lose (symbol, side, session, weekday, duration); describes the past only |
+| `pivot-timemachine` | Replays a trade plan on 1,000 simulated paths from past sessions: odds of target before stop, verdict against the break-even threshold, R distribution; never a forecast (Abonné plan, 10 credits) |
 | `pivot-desk` | Morning briefing adapted to your profile, chaining the others |
-
-`pivot-timemachine` will arrive in a later release.
 
 ## Prerequisite
 
