@@ -23,6 +23,7 @@ Pick the step from the request: "radar", "what do I arm" means steps 1 and 2; "m
 
 ## Step 2: arm (alerts)
 
+0. On `forex`, arm only between 06:00 and 16:00 UTC (London and New York). Outside that window, and above all in the hours after the 22:00 UTC session change, do not arm: say the radar arms from 06:00 UTC and stop after step 1. Arm outside the window only if the user explicitly asks for it. This rule does not apply to `crypto`.
 1. Call `get_calendar` for the next 12 hours.
 2. Call `get_flight_plan` (`grain` D) on each kept symbol. Drop the symbol if any of these is true, and say which:
    - `router.execution_bias` is not on the side fixed in step 1;
@@ -30,13 +31,13 @@ Pick the step from the request: "radar", "what do I arm" means steps 1 and 2; "m
    - a High-impact event on one of its currencies falls within the next 2 hours (offer to arm it after the release).
 3. Call `check_entry` on each survivor with `side` set to the fixed direction (`long` or `short`), never `auto`.
 4. Call `list_alerts` to avoid duplicates.
-5. Propose one entry alert per survivor, on the status strictly after the current one (FAR → `APPROACHING`, APPROACHING → `IN_ZONE`, IN_ZONE → `TRIGGERED`; none when `TRIGGERED`, `INVALIDATED`, `EXPIRED` or `NOT_ARMED`), with the same `side` and `expires_in_days` 1. List every alert (symbol, side, status awaited, expiry) and wait for a clear yes before calling `create_alert`. A yes covers only the alerts listed.
+5. Propose one entry alert per survivor, always on the status `TRIGGERED`, when the current status is `FAR`, `APPROACHING` or `IN_ZONE` (none when it is `TRIGGERED`, `INVALIDATED`, `EXPIRED` or `NOT_ARMED`), with the same `side`, `tf` 15 and `expires_in_days` 1. Never arm `APPROACHING` or `IN_ZONE`: an alert must ring only when there is something to do. Do not pass `zones`: the signal may come on another zone than the one seen now. End the alert `note` with "Stop et zone : relancer check_entry, ne pas utiliser ceux du message." List every alert (symbol, side, expiry) and wait for a clear yes before calling `create_alert`. A yes covers only the alerts listed.
 6. Reply with one table: symbol, direction, why it passed, entry status, alert armed or not. Then one line per dropped symbol with its reason.
 
 ## Step 3: fire (only on an alert)
 
 1. Call `check_entry` on the symbol with the same `side`.
-2. The entry qualifies only if `status` is `TRIGGERED`, `late` is false and the side is the one fixed in step 1. Then give the zone, signal, setup number, trigger price, stop and targets exactly as returned, and call `get_risk_status` if the plan allows it.
+2. The entry qualifies only if `status` is `TRIGGERED`, `late` is false, the side is the one fixed in step 1 and, on `forex`, the trigger time is between 06:00 and 16:00 UTC. Then give the zone, signal, setup number, trigger price, stop and targets exactly as `check_entry` returns them, and call `get_risk_status` if the plan allows it. Never quote the zone or the stop carried by the alert notification: they date from the creation of the alert and may belong to another zone.
 3. If it qualifies, offer the pivot-propose skill so the trade is linked to a TTPOS decision. If it does not, say "no entry" with the reason, and offer the next alert only if the status allows one.
 4. The radar's rule, to state when the user asks about a trade outside it: no alert, no trade; no stop, no trade. The decision stays with the user, in TTPOS.
 
